@@ -335,26 +335,82 @@ Isso permite verificar quais equipamentos estão utilizando endereços distribu�
 
 </div>
 
-Foi configurado um Access Point para fornecer acesso sem fio aos visitantes.
+Foi configurado um Access Point para disponibilizar uma rede sem fio destinada aos visitantes da empresa.
 
-Configurações:
+A rede wireless foi criada utilizando a **VLAN 40 (Visitantes)**, mantendo os dispositivos conectados pelo Wi-Fi separados da rede interna da empresa.
+
+Essa separação permite oferecer acesso à internet/rede para visitantes sem permitir acesso direto aos setores internos, como TI e Servidores.
+
+Configurações realizadas:
 
 | Item | Valor |
 |------|-------|
-| SSID | Visitantes |
+| Dispositivo | Visitantes |
+| SSID | Mini-Tech-Guest |
 | VLAN | 40 |
+| Frequência | 2.4 GHz |
+| Canal | 1 |
+| Alcance | 140 metros |
+| Segurança | WPA2-PSK |
+| Criptografia | AES |
+| Senha | Minitech123 |
 | Gateway | 192.168.40.1 |
 | DHCP | Ativo |
 
-O Access Point foi configurado dentro da VLAN 40 (Visitantes).
+---
 
-Dessa forma, qualquer dispositivo conectado à rede sem fio entra automaticamente na rede de visitantes e recebe um endereço IP da faixa:
+## Configuração de segurança Wireless
 
+A rede sem fio foi protegida utilizando o padrão **WPA2-PSK (Wi-Fi Protected Access 2 - Pre-Shared Key)**.
+
+Esse método utiliza uma chave compartilhada entre o Access Point e os dispositivos autorizados, impedindo que usuários sem a senha consigam se conectar à rede.
+
+Configuração aplicada:
+
+```
+Authentication:
+WPA2-PSK
+
+Encryption Type:
+AES
+
+PSK Pass Phrase:
+Minitech123
+```
+
+O protocolo **AES (Advanced Encryption Standard)** foi utilizado para realizar a criptografia dos dados transmitidos pela rede wireless, aumentando a segurança da comunicação.
+
+---
+
+## Funcionamento da rede Wi-Fi
+
+O funcionamento da rede ocorre da seguinte forma:
+
+1. O dispositivo visitante encontra a rede através do SSID:
+
+```
+Mini-Tech-Guest
+```
+
+2. O usuário informa a senha configurada no WPA2-PSK.
+
+3. O Access Point autentica o dispositivo e permite a conexão.
+
+4. O dispositivo recebe automaticamente um endereço IP através do DHCP da VLAN 40.
+
+Exemplo:
+
+```
+Rede:
 192.168.40.0/24
 
-Essa separação permite fornecer acesso Wi-Fi sem permitir acesso direto aos recursos internos da empresa.
+Gateway:
+192.168.40.1
+```
 
-O dispositivo conectado ao Wi-Fi recebeu IP automaticamente através do DHCP.
+Após receber um endereço IP, o dispositivo passa a se comunicar com o Router.
+
+A comunicação da VLAN 40 é controlada através das regras de ACL configuradas no Router, permitindo o acesso necessário e bloqueando tentativas de acesso aos recursos internos da empresa.
 
 ---
 
