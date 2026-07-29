@@ -50,7 +50,23 @@ Implementar uma infraestrutura de rede organizada, segura e escalável contendo:
 
 <div align="center">
 
-## 🖥️ Topologia da rede
+## 🖥️ Equipamentos utilizados
+
+</div>
+
+| Equipamento | Função |
+|-------------|--------|
+| Router Cisco | Roteamento entre VLANs e aplicação das ACLs |
+| Switch Cisco | Comunicação interna e criação das VLANs |
+| Access Point | Disponibilizar rede wireless para visitantes |
+| PCs | Representar usuários dos departamentos |
+| Servidor | Representar recursos internos da empresa |
+
+---
+
+<div align="center">
+
+## 📡 Topologia da rede
 
 </div>
 
@@ -139,6 +155,12 @@ Mesmo estando conectados ao mesmo switch físico, os dispositivos de VLANs difer
 Para que exista comunicação entre VLANs, é necessário utilizar um dispositivo de camada 3, neste caso o Router Cisco.
 
 As VLANs também ajudam a reduzir o domínio de broadcast, melhorar a organização e aumentar a segurança da rede.
+
+Cada VLAN cria um domínio de broadcast separado.
+
+Isso significa que um broadcast enviado dentro da VLAN 10 não será recebido pelos dispositivos da VLAN 20.
+
+Essa separação melhora desempenho e segurança da rede.
 
 ---
 
@@ -235,6 +257,14 @@ interface gigabitEthernet 0/1
 switchport mode trunk
 ```
 
+O trunk foi configurado na interface do Switch conectada ao Router.
+
+O switch adiciona a tag 802.1Q aos quadros Ethernet quando eles precisam atravessar um link trunk.
+
+O Router não cria VLANs, ele apenas interpreta as tags 802.1Q recebidas pela interface trunk e encaminha o tráfego entre as redes.
+
+O Router utiliza essa informação para encaminhar cada quadro para a subinterface correspondente.
+
 Verificação:
 
 ```bash
@@ -308,10 +338,16 @@ O tráfego passa pelo gateway:
 192.168.10.1
 ```
 
-O Router analisa a rota e encaminha para:
+O Router analisa a rota e encaminha o pacote para a rede:
 
 ```
-192.168.50.1
+192.168.50.0/24
+```
+
+até chegar ao servidor:
+
+```
+192.168.50.10
 ```
 
 ---
@@ -392,13 +428,20 @@ Pool TI:
 
 Os computadores conectados na VLAN TI recebem automaticamente endereços dentro dessa rede.
 
-Foram criados pools para:
+Foram criados pools DHCP para:
 
 - Recepção.
 - TI.
 - Diretoria.
 - Visitantes.
-- Servidores.
+
+Servidores normalmente utilizam IP fixo, pois outros dispositivos precisam encontrar esses serviços sempre no mesmo endereço.
+
+Exemplo:
+
+- Servidor Web: 192.168.50.10
+
+Caso ele recebesse IP automático pelo DHCP, esse endereço poderia mudar e causar problemas de acesso.
 
 Verificação:
 
@@ -426,6 +469,35 @@ Isso permite verificar quais equipamentos estão utilizando endereços distribu�
 
 ---
 
+## Funcionamento do DHCP (DORA)
+
+Quando um dispositivo entra na rede e precisa de um endereço IP, ocorre o processo DORA:
+
+### Discover
+
+O cliente envia uma mensagem broadcast procurando servidores DHCP disponíveis.
+
+### Offer
+
+O servidor DHCP responde oferecendo um endereço IP disponível.
+
+### Request
+
+O cliente solicita oficialmente aquele endereço.
+
+### Acknowledge
+
+O servidor confirma a entrega do endereço IP.
+
+Após isso, o dispositivo recebe:
+
+- IP
+- Máscara
+- Gateway
+- DNS
+
+---
+
 <div align="center">
 
 ## 📶 Rede Wireless
@@ -438,13 +510,15 @@ A rede wireless foi criada utilizando a **VLAN 40 (Visitantes)**, mantendo os di
 
 Essa separação permite oferecer acesso à internet/rede para visitantes sem permitir acesso direto aos setores internos, como TI e Servidores.
 
+A rede de visitantes foi separada da rede corporativa utilizando VLAN, evitando que dispositivos desconhecidos tenham acesso aos recursos internos.
+
 Configurações realizadas:
 
 | Item | Valor |
 |------|-------|
 | Dispositivo | Visitantes |
 | SSID | Mini-Tech-Guest |
-| VLAN | 40 |
+| Rede associada | VLAN 40 |
 | Frequência | 2.4 GHz |
 | Canal | 1 |
 | Alcance | 140 metros |
@@ -453,6 +527,10 @@ Configurações realizadas:
 | Senha | Minitech123 |
 | Gateway | 192.168.40.1 |
 | DHCP | Ativo |
+
+O SSID é o nome público da rede wireless que aparece para os dispositivos próximos.
+
+Ele funciona como o identificador da rede Wi-Fi.
 
 ---
 
@@ -565,6 +643,24 @@ O endereço:
 
 representa toda a rede de servidores.
 
+Nas ACLs Cisco é utilizada uma wildcard mask.
+
+Diferente da máscara de sub-rede, ela indica quais bits devem ser ignorados na comparação.
+
+Exemplo:
+
+- Rede: 192.168.40.0
+- Wildcard: 0.0.0.255
+
+Significa que qualquer endereço dentro da rede 192.168.40.0/24 será correspondido.
+
+Exemplos:
+- 192.168.40.10
+- 192.168.40.50
+- 192.168.40.200
+
+A regra "permit ip any any" foi adicionada para permitir o restante do tráfego que não corresponde às regras anteriores.
+
 Aplicação na interface:
 
 ```bash
@@ -572,6 +668,10 @@ interface gigabitEthernet 0/0.40
 
 ip access-group 100 in
 ```
+
+A ACL foi aplicada na entrada da subinterface da VLAN 40.
+
+Dessa forma, todo tráfego originado pela rede de visitantes é analisado antes de ser encaminhado para outras redes.
 
 Verificação:
 
@@ -629,7 +729,7 @@ O comando ping foi utilizado para validar a comunicação entre dispositivos.
 
 Respostas recebidas indicam que existe conectividade entre origem e destino.
 
-Quando a comunicação é bloqueada pela ACL, o Router retorna uma mensagem de destino inacessível.
+Quando a ACL bloqueia o tráfego, o pacote não é encaminhado ao destino, impedindo a comunicação entre as redes.
 
 ![Teste ACL](screenshots/07-ping-acl-test.png)
 
@@ -693,6 +793,33 @@ Recurso de segurança utilizado para permitir ou bloquear determinados tipos de 
 
 ---
 
+## Relação com o modelo OSI
+
+Durante o projeto foram utilizados conceitos presentes em diferentes camadas do modelo OSI:
+
+| Camada | Aplicação |
+|--------|-----------|
+| Camada 2 - Enlace | VLAN, Switch, Trunk, 802.1Q |
+| Camada 3 - Rede | Router, IP, Gateway, ACL |
+| Camada 4 - Transporte | Comunicação utilizando protocolos TCP/UDP |
+| Camada 7 - Aplicação | DHCP para configuração dos dispositivos |
+
+---
+
+## Configuração do servidor
+
+O servidor foi configurado manualmente dentro da VLAN 50.
+
+Configuração:
+
+- IP: 192.168.50.10
+- Máscara: 255.255.255.0
+- Gateway: 192.168.50.1
+
+O servidor foi utilizado como recurso interno para validar a comunicação entre redes e testar as regras de ACL.
+
+---
+
 <div align="center">
 
 ## 🛠️ Principais comandos utilizados
@@ -727,6 +854,23 @@ Assim, as configurações permanecem após reiniciar o equipamento.
 
 <div align="center">
 
+## 🧠 O que aprendi
+
+</div>
+
+Durante o desenvolvimento deste projeto pratiquei:
+
+- Configuração de switches Cisco.
+- Criação e gerenciamento de VLANs.
+- Comunicação entre redes utilizando Router-on-a-Stick.
+- Implementação de DHCP.
+- Aplicação de ACLs para segurança.
+- Diagnóstico de problemas utilizando comandos show.
+
+---
+
+<div align="center">
+
 ## ✅ Conclusão
 
 </div>
@@ -743,7 +887,7 @@ Durante o desenvolvimento foram aplicados conhecimentos de:
 - Segurança de rede.
 - Controle de acesso.
 
-Este projeto serviu como prática para administração de redes e fundamentos de cibersegurança.
+Este projeto serviu como prática de administração de redes Cisco, permitindo aplicar conceitos utilizados em ambientes corporativos, como segmentação de rede, controle de acesso, gerenciamento de endereçamento IP e segurança de infraestrutura.
 
 ---
 
