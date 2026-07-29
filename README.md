@@ -129,14 +129,16 @@ Exemplo:
 
 ## Endereçamento dos dispositivos
 
-| Dispositivo | IP | Função |
-|-------------|-----|--------|
-| Router VLAN 10 | 192.168.10.1 | Gateway Recepção |
-| Router VLAN 20 | 192.168.20.1 | Gateway TI |
-| Router VLAN 30 | 192.168.30.1 | Gateway Diretoria |
-| Router VLAN 40 | 192.168.40.1 | Gateway Visitantes |
-| Router VLAN 50 | 192.168.50.1 | Gateway Servidores |
-| Servidor | 192.168.50.10 | Servidor da rede |
+> Observação: O projeto utiliza apenas um Router Cisco físico. Os endereços apresentados como gateways pertencem às subinterfaces configuradas no Router utilizando a técnica Router-on-a-Stick, permitindo a comunicação entre as diferentes VLANs.
+
+| Dispositivo | Interface/Subinterface | IP | Função |
+|-------------|------------------------|-----|--------|
+| Router Cisco | VLAN 10 | 192.168.10.1 | Gateway da Recepção |
+| Router Cisco | VLAN 20 | 192.168.20.1 | Gateway da TI |
+| Router Cisco | VLAN 30 | 192.168.30.1 | Gateway da Diretoria |
+| Router Cisco | VLAN 40 | 192.168.40.1 | Gateway dos Visitantes |
+| Router Cisco | VLAN 50 | 192.168.50.1 | Gateway dos Servidores |
+| Servidor | - | 192.168.50.10 | Servidor da rede |
 
 ---
 
@@ -521,7 +523,6 @@ Configurações realizadas:
 | Rede associada | VLAN 40 |
 | Frequência | 2.4 GHz |
 | Canal | 1 |
-| Alcance | 140 metros |
 | Segurança | WPA2-PSK |
 | Criptografia | AES |
 | Senha | Minitech123 |
@@ -600,8 +601,7 @@ A ACL foi criada para controlar o acesso da rede de visitantes.
 Objetivo:
 
 - Visitantes podem acessar sua própria rede.
-- Visitantes não podem acessar servidores.
-- Visitantes não podem acessar redes internas.
+- Visitantes não podem acessar os principais recursos internos protegidos, como servidores, TI e Diretoria.
 
 A ACL funciona analisando os pacotes que passam pelo Router e comparando com as regras configuradas.
 
