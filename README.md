@@ -129,15 +129,15 @@ Exemplo:
 
 ## Endereçamento dos dispositivos
 
-> Observação: O projeto utiliza apenas um Router Cisco físico. Os endereços apresentados como gateways pertencem às subinterfaces configuradas no Router utilizando a técnica Router-on-a-Stick, permitindo a comunicação entre as diferentes VLANs.
+> Observação: A topologia utiliza apenas um Router Cisco físico. Os gateways das VLANs são configurados como subinterfaces no mesmo roteador utilizando a técnica Router-on-a-Stick.
 
 | Dispositivo | Interface/Subinterface | IP | Função |
 |-------------|------------------------|-----|--------|
-| Router Cisco | VLAN 10 | 192.168.10.1 | Gateway da Recepção |
-| Router Cisco | VLAN 20 | 192.168.20.1 | Gateway da TI |
-| Router Cisco | VLAN 30 | 192.168.30.1 | Gateway da Diretoria |
-| Router Cisco | VLAN 40 | 192.168.40.1 | Gateway dos Visitantes |
-| Router Cisco | VLAN 50 | 192.168.50.1 | Gateway dos Servidores |
+| Router Cisco (único) | G0/0.10 - VLAN 10 | 192.168.10.1 | Gateway da Recepção |
+| Router Cisco (único) | G0/0.20 - VLAN 20 | 192.168.20.1 | Gateway da TI |
+| Router Cisco (único) | G0/0.30 - VLAN 30 | 192.168.30.1 | Gateway da Diretoria |
+| Router Cisco (único) | G0/0.40 - VLAN 40 | 192.168.40.1 | Gateway dos Visitantes |
+| Router Cisco (único) | G0/0.50 - VLAN 50 | 192.168.50.1 | Gateway dos Servidores |
 | Servidor | - | 192.168.50.10 | Servidor da rede |
 
 ---
