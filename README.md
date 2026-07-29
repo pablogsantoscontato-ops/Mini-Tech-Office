@@ -90,6 +90,40 @@ Cada setor possui sua própria rede, aumentando a organização e segurança.
 
 ---
 
+## Planejamento de endereçamento IP
+
+Cada VLAN recebeu uma rede IPv4 própria utilizando máscara /24.
+
+A máscara:
+
+```
+255.255.255.0
+```
+
+permite até 254 endereços disponíveis para dispositivos dentro de cada rede.
+
+Exemplo:
+
+- Rede: 192.168.20.0/24
+- Gateway: 192.168.20.1
+- Faixa disponível: 192.168.20.2 - 192.168.20.254
+- Broadcast: 192.168.20.255
+
+---
+
+## Endereçamento dos dispositivos
+
+| Dispositivo | IP | Função |
+|-------------|-----|--------|
+| Router VLAN 10 | 192.168.10.1 | Gateway Recepção |
+| Router VLAN 20 | 192.168.20.1 | Gateway TI |
+| Router VLAN 30 | 192.168.30.1 | Gateway Diretoria |
+| Router VLAN 40 | 192.168.40.1 | Gateway Visitantes |
+| Router VLAN 50 | 192.168.50.1 | Gateway Servidores |
+| Servidor | 192.168.50.10 | Servidor da rede |
+
+---
+
 ### Funcionamento das VLANs
 
 Cada VLAN representa uma rede independente dentro do switch.
@@ -137,6 +171,33 @@ name VISITANTES
 vlan 50
 name SERVIDORES
 ```
+
+---
+
+## Associação das portas às VLANs
+
+As portas conectadas aos computadores foram configuradas no modo access.
+
+Uma porta access pertence a apenas uma VLAN e é utilizada normalmente para conectar dispositivos finais, como:
+
+- Computadores.
+- Servidores.
+- Impressoras.
+- Access Points.
+
+Exemplo:
+
+```bash
+interface fastEthernet 0/3
+
+switchport mode access
+
+switchport access vlan 20
+```
+
+Nesse caso, a porta Fa0/3 pertence à VLAN 20 (TI).
+
+---
 
 ### Verificação:
 
@@ -218,6 +279,42 @@ Um computador da VLAN TI:
 Quando esse computador precisa acessar um servidor da VLAN 50, ele envia o pacote para o gateway 192.168.20.1.
 
 O Router então realiza o roteamento entre as redes.
+
+---
+
+## Comunicação entre VLANs
+
+As VLANs são redes separadas e não conseguem se comunicar diretamente através do Switch.
+
+O Router é responsável por realizar o roteamento entre essas redes.
+
+Exemplo:
+
+Um computador da VLAN 10:
+
+```
+192.168.10.3
+```
+
+acessando um servidor:
+
+```
+192.168.50.10
+```
+
+O tráfego passa pelo gateway:
+
+```
+192.168.10.1
+```
+
+O Router analisa a rota e encaminha para:
+
+```
+192.168.50.1
+```
+
+---
 
 Configuração:
 
@@ -528,6 +625,12 @@ Resultado:
 
 Esse teste comprova que a regra de segurança está funcionando, pois o visitante consegue acessar seu gateway, mas não consegue alcançar recursos protegidos da rede interna.
 
+O comando ping foi utilizado para validar a comunicação entre dispositivos.
+
+Respostas recebidas indicam que existe conectividade entre origem e destino.
+
+Quando a comunicação é bloqueada pela ACL, o Router retorna uma mensagem de destino inacessível.
+
 ![Teste ACL](screenshots/07-ping-acl-test.png)
 
 ---
@@ -605,6 +708,20 @@ Recurso de segurança utilizado para permitir ou bloquear determinados tipos de 
 | `show ip dhcp binding` | Mostra dispositivos que receberam IP pelo DHCP |
 | `show access-lists` | Exibe regras ACL e quantidade de correspondências |
 | `copy running-config startup-config` | Salva a configuração permanentemente |
+
+---
+
+## Salvando configurações
+
+Após finalizar as configurações, foi utilizado:
+
+```bash
+copy running-config startup-config
+```
+
+Esse comando copia a configuração atual da memória RAM (running-config) para a memória permanente (startup-config).
+
+Assim, as configurações permanecem após reiniciar o equipamento.
 
 ---
 
