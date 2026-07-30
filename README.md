@@ -594,74 +594,143 @@ A comunicação da VLAN 40 é controlada através das regras de ACL configuradas
 
 ## 🔐 Configuração de ACL
 
-</div>
+A ACL (**Access Control List**) foi utilizada para implementar controle de acesso entre as redes da empresa.
 
-A ACL foi criada para controlar o acesso da rede de visitantes.
+Neste projeto, a ACL foi aplicada na rede de visitantes (VLAN 40) com o objetivo de impedir que dispositivos externos tenham acesso aos recursos internos da empresa.
 
 Objetivo:
 
-- Visitantes podem acessar sua própria rede.
-- Visitantes não podem acessar os principais recursos internos protegidos, como servidores, TI e Diretoria.
+- Visitantes podem se comunicar dentro da própria rede.
+- Visitantes não podem acessar servidores.
+- Visitantes não podem acessar a rede da TI.
+- Visitantes não podem acessar a rede da Diretoria.
 
-A ACL funciona analisando os pacotes que passam pelo Router e comparando com as regras configuradas.
-
-Neste projeto, a rede de visitantes recebeu restrições para impedir acesso aos setores internos.
+A ACL funciona analisando os pacotes que passam pelo Router e comparando as informações de origem e destino com as regras configuradas.
 
 Exemplo:
 
-- Origem: 192.168.40.0/24 (Visitantes)
-- Destino: 192.168.50.0/24 (Servidores)
-- Resultado: Bloqueado.
+- Origem: `192.168.40.0/24` → Rede de Visitantes
+- Destino: `192.168.50.0/24` → Rede de Servidores
+- Resultado: Tráfego bloqueado.
 
-Configuração:
+---
+
+### Estrutura do comando ACL
+
+A estrutura básica de uma ACL Cisco é:
+
+```bash
+access-list número ação protocolo origem wildcard destino wildcard
+```
+
+Exemplo:
 
 ```bash
 access-list 100 deny ip 192.168.40.0 0.0.0.255 192.168.50.0 0.0.0.255
+```
 
+Explicação:
+
+- `access-list 100` → cria uma ACL identificada pelo número 100.
+- `deny` → bloqueia o tráfego que corresponde à regra.
+- `ip` → analisa tráfego baseado no protocolo IP.
+- `192.168.40.0 0.0.0.255` → define a rede de origem (Visitantes).
+- `192.168.50.0 0.0.0.255` → define a rede de destino (Servidores).
+
+Essa regra significa:
+
+> Bloquear qualquer dispositivo da rede de visitantes tentando acessar qualquer dispositivo da rede de servidores.
+
+---
+
+### Regras configuradas
+
+```bash
+access-list 100 deny ip 192.168.40.0 0.0.0.255 192.168.50.0 0.0.0.255
+```
+
+Bloqueia:
+
+```
+Visitantes → Servidores
+```
+
+---
+
+```bash
 access-list 100 deny ip 192.168.40.0 0.0.0.255 192.168.20.0 0.0.0.255
+```
 
+Bloqueia:
+
+```
+Visitantes → TI
+```
+
+---
+
+```bash
 access-list 100 deny ip 192.168.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+```
 
+Bloqueia:
+
+```
+Visitantes → Diretoria
+```
+
+---
+
+```bash
 access-list 100 permit ip any any
 ```
 
-O comando `deny` informa que o tráfego correspondente deve ser bloqueado.
+Permite qualquer outro tráfego que não corresponda às regras anteriores.
 
-O endereço:
+Essa regra é importante porque as ACLs Cisco possuem uma regra implícita no final que bloqueia todo tráfego não permitido.
 
-```
-192.168.40.0 0.0.0.255
-```
+---
 
-representa toda a rede de visitantes.
+## Wildcard Mask
 
-O endereço:
+Nas ACLs Cisco é utilizada uma **Wildcard Mask** para identificar quais endereços IP devem ser considerados na comparação.
 
-```
-192.168.50.0 0.0.0.255
-```
+Ela funciona de forma diferente da máscara de sub-rede:
 
-representa toda a rede de servidores.
-
-Nas ACLs Cisco é utilizada uma wildcard mask.
-
-Diferente da máscara de sub-rede, ela indica quais bits devem ser ignorados na comparação.
+- Valor `0` → o valor precisa ser exatamente igual.
+- Valor `255` → o valor pode variar.
 
 Exemplo:
 
-- Rede: 192.168.40.0
-- Wildcard: 0.0.0.255
+```
+Rede:
+192.168.40.0
 
-Significa que qualquer endereço dentro da rede 192.168.40.0/24 será correspondido.
+Wildcard:
+0.0.0.255
+```
 
-Exemplos:
-- 192.168.40.10
-- 192.168.40.50
-- 192.168.40.200
+Representa todos os dispositivos da rede:
 
-A regra "permit ip any any" foi adicionada para permitir o restante do tráfego que não corresponde às regras anteriores.
+```
+192.168.40.X
+```
 
-Aplicação na interface:
+Exemplos correspondentes:
+
+```
+192.168.40.10
+192.168.40.50
+192.168.40.200
+```
+
+Ou seja, a regra será aplicada para qualquer dispositivo pertencente à VLAN 40.
+
+---
+
+## Aplicação da ACL
+
+Após criar as regras, a ACL foi aplicada na entrada da subinterface da VLAN 40:
 
 ```bash
 interface gigabitEthernet 0/0.40
@@ -669,29 +738,40 @@ interface gigabitEthernet 0/0.40
 ip access-group 100 in
 ```
 
-A ACL foi aplicada na entrada da subinterface da VLAN 40.
+Explicação:
 
-Dessa forma, todo tráfego originado pela rede de visitantes é analisado antes de ser encaminhado para outras redes.
+- `interface gigabitEthernet 0/0.40` → acessa a subinterface responsável pela VLAN 40.
+- `ip access-group 100 in` → aplica a ACL 100 para o tráfego que entra nessa interface.
 
-Verificação:
+Isso significa que todo pacote enviado pelos visitantes passa pela ACL antes de ser encaminhado pelo Router.
+
+---
+
+## Verificação da ACL
+
+Para verificar as regras configuradas:
 
 ```bash
 show access-lists
 ```
 
+Esse comando exibe:
+
+- Regras existentes.
+- Permissões e bloqueios configurados.
+- Quantidade de pacotes que passaram por cada regra.
+
 ![ACL Rules](screenshots/09-acl-rules.png)
 
-Verificação da aplicação:
+Para verificar a aplicação da ACL na interface:
 
 ```bash
 show ip interface gigabitEthernet 0/0.40
 ```
 
+Esse comando mostra se a ACL está aplicada corretamente na subinterface da VLAN 40.
+
 ![ACL Interface](screenshots/10-acl-interface.png)
-
----
-
-<div align="center">
 
 ## 🧪 Testes realizados
 
