@@ -802,7 +802,7 @@ Durante o projeto foram utilizados conceitos presentes em diferentes camadas do 
 | Camada 2 - Enlace | VLAN, Switch, Trunk, 802.1Q |
 | Camada 3 - Rede | Router, IP, Gateway, ACL |
 | Camada 4 - Transporte | Comunicação utilizando protocolos TCP/UDP |
-| Camada 7 - Aplicação | DHCP para configuração dos dispositivos |
+| Camada 7 - Aplicação | DHCP (atribuição automática de IP, máscara, gateway e DNS). |
 
 ---
 
