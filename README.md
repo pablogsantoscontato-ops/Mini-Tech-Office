@@ -595,6 +595,8 @@ A comunicação da VLAN 40 é controlada através das regras de ACL configuradas
 
 ## 🔐 Configuração de ACL
 
+</div>
+
 A ACL (**Access Control List**) foi utilizada para implementar controle de acesso entre as redes da empresa.
 
 Neste projeto, a ACL foi aplicada na rede de visitantes (VLAN 40) com o objetivo de impedir que dispositivos externos tenham acesso aos recursos internos da empresa.
@@ -773,8 +775,6 @@ show ip interface gigabitEthernet 0/0.40
 Esse comando mostra se a ACL está aplicada corretamente na subinterface da VLAN 40.
 
 ![ACL Interface](screenshots/10-acl-interface.png)
-
-</div>
 
 ---
 
