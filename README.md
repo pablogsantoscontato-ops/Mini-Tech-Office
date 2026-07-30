@@ -815,6 +815,7 @@ Configuração:
 - IP: 192.168.50.10
 - Máscara: 255.255.255.0
 - Gateway: 192.168.50.1
+- DNS: 8.8.8.8
 
 O servidor foi utilizado como recurso interno para validar a comunicação entre redes e testar as regras de ACL.
 
