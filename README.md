@@ -1,3 +1,4 @@
+```markdown
 # 🏢 Mini-Tech-Office
 
 <div align="center">
@@ -773,6 +774,12 @@ Esse comando mostra se a ACL está aplicada corretamente na subinterface da VLAN
 
 ![ACL Interface](screenshots/10-acl-interface.png)
 
+</div>
+
+---
+
+<div align="center">
+
 ## 🧪 Testes realizados
 
 </div>
@@ -993,3 +1000,4 @@ Estudante de Sistemas da Informação com foco em Redes e Cibersegurança.
 <sub>Desenvolvido com ❤️ para o aprendizado de redes</sub>
 
 </div>
+```
