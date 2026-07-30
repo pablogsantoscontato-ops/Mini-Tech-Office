@@ -1,4 +1,3 @@
-```markdown
 # 🏢 Mini-Tech-Office
 
 <div align="center">
@@ -1000,4 +999,3 @@ Estudante de Sistemas da Informação com foco em Redes e Cibersegurança.
 <sub>Desenvolvido com ❤️ para o aprendizado de redes</sub>
 
 </div>
-```
